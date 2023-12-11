@@ -15,14 +15,21 @@ def main():
     # NetBrain API call
     with harvesters.netbrain.NetbrainAPI() as netbrain:
         netbrain.login()
-        response = netbrain.get("")
-        print (response)
+        netbrain.set_domain()
+        #response = netbrain.get("")
+        #print (response)
 
 
     # AKIPS API call
     with harvesters.akips.AkipsAPI() as akips:
-        response = akips.request("GET",";filename=sp2vlan","api-spm")
-        print (response.text)
+        prevLine = ""
+        response = akips.get(';time=last1m;type=syslog;', api='api-msg')
+        lines = response.text.split("\n")
+        for line in lines:
+            if "syslog" in line:
+                lastEvent = prevLine + "\n" + line
+                prevLine = line
+        print(lastEvent)
 
 if __name__ == '__main__':
     main()
