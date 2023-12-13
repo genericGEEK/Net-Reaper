@@ -15,7 +15,7 @@ def main():
     # NetBrain API call
     with harvesters.netbrain.NetbrainAPI() as netbrain:
         netbrain.login()
-        netbrain.set_domain()
+        #netbrain.set_domain()
         #response = netbrain.get("")
         #print (response)
 

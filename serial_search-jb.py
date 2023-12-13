@@ -8,17 +8,17 @@ import json
 
 # Argument parser
 parser = argparse.ArgumentParser()
-parser.add_argument('sn', help='Valid Serial Numbers separated by commas')
+parser.add_argument('serial_numbers', help='Valid Serial Numbers separated by commas (no spaces)')
 ARGS = parser.parse_args()
 
-serials = ARGS.sn
+serials = ARGS.serial_numbers
 
 def main():
     for s in serials.split(","):
         # DNAC API call
         with harvesters.dnac.DnacAPI() as dnac:
             dnac.login(username=DNAC_USER, passwd=DNAC_PASS)
-            response = dnac.get('api/v1/network-device?serialNumber=' + s)
+            response = dnac.get('api/v1/network-device?serialNumber=' + s.strip())
             data = json.loads(str(response))
             resp = data.get('response', [])
             if len(resp) == 0:
