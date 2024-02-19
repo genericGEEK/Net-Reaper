@@ -1,5 +1,6 @@
 import csv
 import pandas as pd
+from threading import Lock
 from config.config import DOMAIN_STRIP_DICT
 
 
@@ -35,7 +36,7 @@ def strip_port(value):
     return new_value
 
 
-def serial_parse(records, nms=None, family=None):
+def serial_parse(records, nms=None, family=None, location=None):
     skip = 'no'
     if nms == 'dnac':
         if 'hostname' in records:
@@ -70,6 +71,7 @@ def serial_parse(records, nms=None, family=None):
         else:
             model = 'Missing'
         family = family
+        location = location
     elif nms == 'akips':
         if 'name' in records:
             hostname = strip_hostname(records['name'])
@@ -84,14 +86,29 @@ def serial_parse(records, nms=None, family=None):
         else:
             model = 'Missing'
         family = family
+        location = location
     else:
         hostname = 'Missing'
         serial = 'Missing'
         model = 'Missing'
         family = 'Missing'
+        location = 'Missing'
     if skip == 'no':
-        results_dict = {'hostname': hostname, 'serial': serial, 'model': model, 'family': family}
+        results_dict = {'hostname': hostname, 'serial': serial, 'model': model, 'family': family, 'location': location}
         return results_dict
+
+
+def create_csv_header(to_csv, header):
+    with open(to_csv, 'a', newline='') as output_csv:
+        csv_writer = csv.DictWriter(output_csv, fieldnames=header)
+        csv_writer.writeheader()
+
+
+def write_csv_threads(to_csv, res, header):
+    with open(to_csv, 'a', newline='') as output_csv:
+        csv_writer = csv.DictWriter(output_csv, fieldnames=header)
+        for entry in res:
+            csv_writer.writerow(entry)
 
 
 def write_to_csv(to_csv, res, header, total_cnt, is_header='no'):
